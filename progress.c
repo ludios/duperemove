@@ -75,6 +75,10 @@ static _Atomic uint64_t search_total, search_processed;
 
 #define percent(val1, val2) ((double) val1 / (double) val2 * 100)
 
+/* Sizes in bytes get thousands separators unless --human-readable is used */
+#define progress_size(size) \
+	(human_readable ? pretty_size(size) : comma_num(size))
+
 void pscan_finish_listing(void)
 {
 	pscan.listing_completed = true;
@@ -100,8 +104,8 @@ static void print_thread_progress(struct pscan_thread *tprogress)
 			tprogress->tid,
 			"checksumming:",
 			tprogress->file_path,
-			pretty_size(tprogress->file_scanned_bytes),
-			pretty_size(tprogress->file_total_bytes),
+			progress_size(tprogress->file_scanned_bytes),
+			progress_size(tprogress->file_total_bytes),
 			percent(tprogress->file_scanned_bytes, tprogress->file_total_bytes));
 		break;
 	case thread_waiting_lock:
@@ -109,14 +113,14 @@ static void print_thread_progress(struct pscan_thread *tprogress)
 			tprogress->tid,
 			"waiting for lock:",
 			tprogress->file_path,
-			pretty_size(tprogress->file_total_bytes));
+			progress_size(tprogress->file_total_bytes));
 		break;
 	case thread_committing:
 		snprintf(buf, BUF_LEN, "[%u] %-20s%s (size: %s)",
 			tprogress->tid,
 			"committing:",
 			tprogress->file_path,
-			pretty_size(tprogress->file_total_bytes));
+			progress_size(tprogress->file_total_bytes));
 		break;
 	}
 
@@ -126,12 +130,12 @@ static void print_thread_progress(struct pscan_thread *tprogress)
 
 static void print_total_progress(void)
 {
-	s_printf("\tFiles scanned: %lu/%lu (%05.2f%%)\n",
-	      files_scanned, pscan.total_files_count,
+	s_printf("\tFiles scanned: %s/%s (%05.2f%%)\n",
+	      comma_num(files_scanned), comma_num(pscan.total_files_count),
 	      (double)files_scanned / (double)pscan.total_files_count * 100);
 	s_printf("\tBytes scanned: %s/%s (%05.2f%%)\n",
-	      pretty_size(bytes_scanned),
-	      pretty_size(pscan.total_bytes_count),
+	      progress_size(bytes_scanned),
+	      progress_size(pscan.total_bytes_count),
 	      (double)bytes_scanned / (double)pscan.total_bytes_count * 100);
 	s_printf("\tFile listing: %s\n",
 		pscan.listing_completed ? "completed" : "in progress");

@@ -43,6 +43,14 @@ int pretty_size_snprintf(uint64_t size, char *str, size_t str_bytes);
 		_str;							\
 	})
 
+int comma_num_snprintf(uint64_t num, char *str, size_t str_bytes);
+#define comma_num(num) 						\
+	({								\
+		static __thread char _str[32];				\
+		(void)comma_num_snprintf((num), _str, sizeof(_str));	\
+		_str;							\
+	})
+
 /* Trivial wrapper around gettimeofday */
 struct elapsed_time {
 	struct timeval	start;

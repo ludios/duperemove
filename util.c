@@ -128,6 +128,24 @@ int pretty_size_snprintf(uint64_t size, char *str, size_t str_bytes)
 			size_strs[num_divs]);
 }
 
+/* Print num with thousands separators, e.g. 1234567 -> "1,234,567" */
+int comma_num_snprintf(uint64_t num, char *str, size_t str_bytes)
+{
+	char digits[21];
+	char buf[27]; /* 20 digits + 6 commas + NUL */
+	int len, i, j = 0;
+
+	len = snprintf(digits, sizeof(digits), "%"PRIu64, num);
+	for (i = 0; i < len; i++) {
+		if (i && (len - i) % 3 == 0)
+			buf[j++] = ',';
+		buf[j++] = digits[i];
+	}
+	buf[j] = '\0';
+
+	return snprintf(str, str_bytes, "%s", buf);
+}
+
 void print_stack_trace(void)
 {
 	void *trace[16];
