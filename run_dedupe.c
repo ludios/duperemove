@@ -338,10 +338,14 @@ static int dedupe_extent_list(struct dupe_extents *dext, uint64_t *fiemap_bytes,
 			 * If this was our last duplicate extent in
 			 * the list, and we added dupes from a
 			 * previous iteration of the loop we need to
-			 * run dedupe before exiting.
+			 * run dedupe before exiting. Otherwise, close
+			 * the target if it was reopened after an
+			 * earlier dedupe.
 			 */
 			if (ctxt && last)
 				goto run_dedupe;
+			if (last)
+				goto close_files;
 			continue;
 		}
 
